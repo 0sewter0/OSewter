@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "x86_64-elf",
+            "compilerPath": "C:\\msys64\\clang64\\bin\\clang.exe",
+            "compilerArgs": [
+                "--target=x86_64-elf",
+                "-ffreestanding",
+                "-fno-stack-protector",
+                "-fno-stack-check",
+                "-fno-pic",
+                "-fno-pie",
+                "-mno-red-zone",
+                "-mno-sse",
+                "-mno-sse2",
+                "-mcmodel=kernel",
+                "-std=c11",
+                "-Isrc"
+            ],
+            "includePath": [
+                "${workspaceFolder}/src"
+            ],
+            "intelliSenseMode": "windows-clang-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
