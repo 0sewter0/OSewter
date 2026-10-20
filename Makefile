@@ -20,9 +20,14 @@ all: $(ISO)
 src/kernel.o: src/kernel.c src/limine.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-iso_root/boot/kernel.elf: src/kernel.o linker.ld
+OBJ = src/kernel.o src/mm/pmm.o
+
+src/mm/pmm.o: src/mm/pmm.c src/mm/pmm.h src/limine.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+iso_root/boot/kernel.elf: $(OBJ) linker.ld
 	mkdir -p $(@D)
-	$(LD) $(LDFLAGS) -o $@ src/kernel.o
+	$(LD) $(LDFLAGS) -o $@ $(OBJ)
 
 
 iso_root/limine.conf: src/limine.conf

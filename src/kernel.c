@@ -14,8 +14,6 @@ static volatile struct limine_framebuffer_request framebuffer_request = {
 };
 
 void draw_pixel(struct limine_framebuffer *fb, uint64_t x, uint64_t y, uint32_t color) {
-    // Calculate the pixel's memory address
-    // Start + (row * number of bytes per row) + (column * bytes per pixel)
     uint32_t *pixel_address = (uint32_t *)((uint8_t *)fb->address + y * fb->pitch + x * (fb->bpp / 8));
     *pixel_address = color;
 }
@@ -45,6 +43,5 @@ void _start(void) {
         }
     }
 
-    // Wait for interrupts
     for (;;) { __asm__("hlt"); }
 }
