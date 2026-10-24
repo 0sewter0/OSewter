@@ -88,7 +88,7 @@ void pmm_free_page(uintptr_t physical_address) {
 }
 
 
-void init_pmm(void) {
+void pmm_init(void) {
     if(memmap_request.response == NULL || hhdm_request.response == NULL) {
         for (;;) { __asm__("hlt"); }
     }

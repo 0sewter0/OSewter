@@ -1,6 +1,11 @@
 #include <stdint.h>
 #include <stddef.h>
+
 #include "limine.h"
+#include "arch/x86_64/gdt/gdt.h"
+#include "arch/x86_64/idt/idt.h"
+#include "mm/pmm.h"
+#include "drivers/serial.h"
 
 // Setting the base protocol revision
 __attribute__((used, section(".limine_requests")))
@@ -24,24 +29,18 @@ void _start(void) {
         for (;;) { __asm__("hlt"); }
     }
 
-    // Get the main pointer to the first display
-    struct limine_framebuffer *fb = framebuffer_request.response->framebuffers[0];
+    gdt_init();
+    idt_init();
+    pmm_init();
 
-    // Beautiful blue filling
-    for (uint64_t y = 0; y < fb->height; y++) {
-        for (uint64_t x = 0; x < fb->width; x++) {
-            draw_pixel(fb, x, y, 0x002B36);
-        }
-    }
+    serial_init();
+    serial_print("Serial logging driver initialized inside the terminal\n");
 
-    // Draw a white square to test
-    uint64_t start_x = fb->width / 2 - 50;
-    uint64_t start_y = fb->height / 2 - 50;
-    for (uint64_t y = start_y; y < start_y + 100; y++) {
-        for (uint64_t x = start_x; x < start_x + 100; x++) {
-            draw_pixel(fb, x, y, 0xFFFFFF);
-        }
-    }
+    serial_print("Testing IDT: Triggering Division by Zero Fault...\n");
+    volatile int a = 5;
+    volatile int b = 0;
+    volatile int c = a / b; 
+    (void)c;
 
     for (;;) { __asm__("hlt"); }
 }
