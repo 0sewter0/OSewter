@@ -1,5 +1,5 @@
 #include "idt.h"
-#include "drivers/serial.h"
+#include "lib/stdio.h"
 
 extern void* isr_stub_table[];
 
@@ -52,27 +52,27 @@ static const char* exception_messages[] = {
 
 void idt_handler(struct interrupt_frame* frame) {
     if(frame->interrupt_number < 32) {
-        serial_print("\n  KERNEL PANIC: Unhandled Processor Exception\n");
+        kprintf("\n  KERNEL PANIC: Unhandled Processor Exception\n");
 
-        serial_print("Exception: ");
+        kprintf("Exception: ");
         if(frame->interrupt_number < 16) {
-            serial_print(exception_messages[frame->interrupt_number]);
+            kprintf(exception_messages[frame->interrupt_number]);
         } else {
-            serial_print("Reserved/Unknown Fault");
+            kprintf("Reserved/Unknown Fault");
         }
-        serial_print("\n");
+        kprintf("\n");
         // if Page Fault (14), reading the register CR2.
         // It is in CR2 that the processor records the exact memory address that the program has touched
         if(frame->interrupt_number == 14) {
             uint64_t faulty_address;
-            __asm__ volatile("mov %%cr2, %0" : "=r"(faulty_address));
+            __asm__ volatile ("mov %%cr2, %0" : "=r"(faulty_address));
 
-            serial_print("CR2 (Faulty Memory Address): "); // Cannot write to output HEX number yet
-            serial_print("Address captured into CR2 successfully.\n");
+            kprintf("CR2 (Faulty Memory Address): %x", faulty_address, "\n");
+            kprintf("\nAddress captured into CR2 successfully.\n");
+
+            kprintf("Error code: %x", frame->error_code);
         }
-
-        serial_print("Crash location (RIP): Code execution halted.\n");
-
+        kprintf("Crash location (RIP): %x", frame->rip, "\n");
         for (;;) { __asm__("hlt"); }
     }
 }

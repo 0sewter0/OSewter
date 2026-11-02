@@ -1,6 +1,7 @@
 #include "gdt.h"
+#include "tss/tss.h"
 
-static struct gdt_entry gdt[5];
+static struct gdt_entry gdt[7];
 static struct gdt_ptr gdt_pointer;
 
 extern void gdt_load(struct gdt_ptr* ptr);
@@ -15,6 +16,26 @@ static void gdt_set_gate(int num, uint32_t base, uint32_t limit, uint8_t access,
 
     gdt[num].granularity |= gran & 0xF0;
     gdt[num].access      = access;
+}
+
+void gdt_set_tss(int num, uint64_t tss_addr, uint32_t limit) {
+    struct gdt_entry* low_slot  = &gdt[num];
+
+    // 0x89 (Present, Executable/TSS, Descriptor Privilege Level = 0)
+    low_slot->limit_low   = (limit & 0xFFFF);
+    low_slot->granularity = (limit >> 16) & 0x0F;
+    low_slot->granularity |= 0x00;
+    
+    low_slot->access      = 0x89;  // 0b10001001 
+
+    low_slot->base_low    = (tss_addr & 0xFFFF);
+    low_slot->base_middle = (tss_addr >> 16) & 0xFF;
+    low_slot->base_high   = (tss_addr >> 24) & 0xFF;
+
+    uint32_t* high_slot_raw = (uint32_t*)&gdt[num + 1];
+    
+    high_slot_raw[0] = (uint32_t)(tss_addr >> 32); 
+    high_slot_raw[1] = 0;
 }
 
 void gdt_init(void) {
@@ -35,6 +56,14 @@ void gdt_init(void) {
 
     // 0x20 - User Code. Access 0xFA (Present, Ring 3, Executable, Read), Granularity 0x20 (Long Mode)
     gdt_set_gate(4, 0, 0, 0xFA, 0x20);
+
+    gdt_load(&gdt_pointer);
+}
+
+void add_tss() {
+    uint64_t tss_base = (uint64_t)&tss;
+    uint32_t tss_limit = sizeof(tss) - 1;
+    gdt_set_tss(5, tss_base, tss_limit);
 
     gdt_load(&gdt_pointer);
 }

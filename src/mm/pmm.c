@@ -10,10 +10,11 @@ static volatile struct limine_memmap_request memmap_request = {
     .revision = 0
 };
 
-static volatile struct limine_hhdm_request hhdm_request = {
+volatile struct limine_hhdm_request hhdm_request = {
     .id = LIMINE_HHDM_REQUEST,
     .revision = 0
 };
+
 
 uint64_t* pmm_bitmap = NULL;
 size_t pmm_total_pages = 0;

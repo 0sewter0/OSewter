@@ -17,3 +17,4 @@ struct gdt_ptr {
 } __attribute__((packed));
 
 void gdt_init(void);
+void add_tss(void);

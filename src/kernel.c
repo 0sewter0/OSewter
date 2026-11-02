@@ -5,6 +5,7 @@
 #include "arch/x86_64/gdt/gdt.h"
 #include "arch/x86_64/idt/idt.h"
 #include "mm/pmm.h"
+#include "mm/vmm.h"
 #include "drivers/serial.h"
 
 // Setting the base protocol revision
@@ -30,17 +31,14 @@ void _start(void) {
     }
 
     gdt_init();
+    add_tss();
     idt_init();
     pmm_init();
-
     serial_init();
     serial_print("Serial logging driver initialized inside the terminal\n");
+    vmm_init();
 
-    serial_print("Testing IDT: Triggering Division by Zero Fault...\n");
-    volatile int a = 5;
-    volatile int b = 0;
-    volatile int c = a / b; 
-    (void)c;
+    
 
     for (;;) { __asm__("hlt"); }
 }

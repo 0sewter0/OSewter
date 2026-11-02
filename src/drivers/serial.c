@@ -13,7 +13,6 @@ static inline uint8_t inb(uint16_t port) {
     __asm__ volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port));
     return ret;
 }
-
 static int is_transmit_empty(void) {
     return inb(COM1 + 5) & 0x20;
 }
@@ -33,7 +32,7 @@ void serial_putc(char c) {
 
     if(c == '\n') {
         outb(COM1, '\r');
-        while (is_transmit_empty() == 0);
+        while(is_transmit_empty() == 0);
     }
     
     outb(COM1, c);

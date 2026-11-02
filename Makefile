@@ -7,7 +7,7 @@ CFLAGS = --target=x86_64-elf -Wall -Wextra -std=c11 -O2 \
          -ffreestanding -fno-stack-protector -fno-stack-check \
          -fno-pic -fno-pie -fno-lto -m64 -march=x86-64 \
          -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone \
-         -mcmodel=kernel -Isrc
+         -mcmodel=kernel -Isrc -fno-builtin
 
 LDFLAGS = -m elf_x86_64 -T linker.ld --build-id=none
 ASFLAGS = -f elf64
@@ -28,16 +28,29 @@ OBJ = src/kernel.o \
       src/arch/x86_64/gdt/gdt.o \
       src/arch/x86_64/gdt/gdt_asm.o \
       src/arch/x86_64/idt/idt.o \
-      src/arch/x86_64/idt/idt_asm.o
+      src/arch/x86_64/idt/idt_asm.o \
+	  src/klib/string.o \
+	  src/mm/vmm.o \
+	  src/lib/stdio.o \
+	  src/arch/x86_64/gdt/tss/tss.o
 
 src/mm/pmm.o: src/mm/pmm.c src/mm/pmm.h src/limine.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/mm/vmm.o: src/mm/vmm.c src/mm/vmm.h src/limine.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 iso_root/boot/kernel.elf: $(OBJ) linker.ld
 	mkdir -p $(@D)
 	$(LD) $(LDFLAGS) -o $@ $(OBJ)
 
+src/lib/stdio.o: src/lib/stdio.c src/lib/stdio.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 src/arch/x86_64/gdt/gdt.o: src/arch/x86_64/gdt/gdt.c src/arch/x86_64/gdt/gdt.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/arch/x86_64/gdt/tss/tss.o: src/arch/x86_64/gdt/tss/tss.c src/arch/x86_64/gdt/tss/tss.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 src/arch/x86_64/gdt/gdt_asm.o: src/arch/x86_64/gdt/gdt.asm
@@ -50,6 +63,9 @@ src/arch/x86_64/idt/idt_asm.o: src/arch/x86_64/idt/idt.asm
 	$(AS) $(ASFLAGS) $< -o $@
 
 src/drivers/serial.o: src/drivers/serial.c src/drivers/serial.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/klib/string.o: src/klib/string.c src/klib/string.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 iso_root/limine.conf: src/limine.conf

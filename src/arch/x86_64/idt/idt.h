@@ -9,7 +9,7 @@ struct idt_entry {
     uint8_t  attributes;
     uint16_t isr_mid;
     uint32_t isr_high;
-    uint32_t reserved;         // Always 0
+    uint32_t reserved;
 } __attribute__((packed));
 
 
