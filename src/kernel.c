@@ -6,6 +6,7 @@
 #include "arch/x86_64/idt/idt.h"
 #include "mm/pmm.h"
 #include "mm/vmm.h"
+#include "arch/x86_64/gdt/tss/tss.h"
 #include "drivers/serial.h"
 
 // Setting the base protocol revision
@@ -31,14 +32,12 @@ void _start(void) {
     }
 
     gdt_init();
-    add_tss();
     idt_init();
     pmm_init();
     serial_init();
     serial_print("Serial logging driver initialized inside the terminal\n");
     vmm_init();
-
-    
+    init_tss();
 
     for (;;) { __asm__("hlt"); }
 }

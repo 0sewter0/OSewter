@@ -18,3 +18,4 @@ struct gdt_ptr {
 
 void gdt_init(void);
 void add_tss(void);
+void gdt_set_tss(int num, uint64_t tss_addr, uint32_t limit);

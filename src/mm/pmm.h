@@ -6,3 +6,4 @@
 void pmm_init(void);
 uintptr_t pmm_alloc_page(void);
 void pmm_free_page(uintptr_t page_address);
+uint64_t get_pml4_address();

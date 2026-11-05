@@ -160,3 +160,14 @@ void pmm_init(void) {
     }
     bitmap_set(0);
 }
+
+uint64_t get_pml4_address() {
+    uint64_t cr3;
+    __asm__ __volatile__ (
+        "mov %%cr3, %0"
+        : "=r"(cr3)
+        :
+        : "memory"
+    );
+    return cr3; 
+}

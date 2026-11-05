@@ -8,12 +8,12 @@ static struct idt_entry idt[256];
 static struct idt_pointer idt_ptr;
 
 // Internal function for registering an interrupt handler
-void idt_set_descriptor(uint8_t vector, void* isr, uint8_t attributes) {
+void idt_set_descriptor(uint8_t vector, void* isr, uint8_t attributes, uint8_t ist) {
     uint64_t addr = (uint64_t)isr;
 
     idt[vector].isr_low    = (uint16_t)(addr & 0xFFFF);
     idt[vector].kernel_cs  = 0x08; // kernel code segment
-    idt[vector].ist        = 0;
+    idt[vector].ist        = (ist & 0x7);
     idt[vector].attributes = attributes;
     idt[vector].isr_mid    = (uint16_t)((addr >> 16) & 0xFFFF);
     idt[vector].isr_high   = (uint32_t)((addr >> 32) & 0xFFFFFFFF);
@@ -30,12 +30,12 @@ void idt_init(void) {
     // Bit 4 (Storage) = 0 (For interrupt gates)
     // Bits 3-0 (Type) = 1110 (0xE - 64-bit Interrupt Gate)
 
-     for (uint8_t vector = 0; vector < 32; vector++) {
-        idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
-    }
-    
+     for(uint8_t vector = 0; vector < 32; vector++) {
+        idt_set_descriptor(vector, isr_stub_table[vector], 0x8E, 0);
+    }    
+    idt_set_descriptor(8, isr_stub_table[8], 0x8E, 1);
+
     __asm__ volatile ("lidt %0" :: "m"(idt_ptr));
-    
     __asm__ volatile ("sti");
 }
 

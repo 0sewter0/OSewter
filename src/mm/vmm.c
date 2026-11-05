@@ -54,12 +54,11 @@ void vmm_map(uint64_t* pml4_virt, uint64_t virt, uint64_t phys, uint64_t flags) 
     // Flush the processor cache (TLB) for the modified address
     __asm__ volatile("invlpg (%0)" :: "r"(virt) : "memory");
 }
-
 void vmm_init(void) {
     // Allocate a physical page for the new root PML4 table
-    uint64_t new_pml4_phys = pmm_alloc_page();
-    uint64_t* new_pml4_virt = (uint64_t*)phys_to_virt(new_pml4_phys);
-    memset(new_pml4_virt, 0, PAGE_SIZE);
+    uint64_t pml4_phys = pmm_alloc_page();
+    uint64_t* pml4_virt = (uint64_t*)phys_to_virt(pml4_phys);
+    memset(pml4_virt, 0, PAGE_SIZE);
 
     uint64_t old_pml4_phys;
     __asm__ volatile("mov %%cr3, %0" : "=r"(old_pml4_phys));
@@ -67,8 +66,8 @@ void vmm_init(void) {
 
     // Indices 256 through 511 correspond to the upper virtual addresses (kernel and HHDM)
     for(size_t i = 256; i < 512; i++) {
-        new_pml4_virt[i] = old_pml4_virt[i];
+        pml4_virt[i] = old_pml4_virt[i];
     }
 
-    __asm__ volatile("mov %0, %%cr3" :: "r"(new_pml4_phys) : "memory");
+    __asm__ volatile("mov %0, %%cr3" :: "r"(pml4_phys) : "memory");
 }

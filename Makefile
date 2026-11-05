@@ -32,7 +32,8 @@ OBJ = src/kernel.o \
 	  src/klib/string.o \
 	  src/mm/vmm.o \
 	  src/lib/stdio.o \
-	  src/arch/x86_64/gdt/tss/tss.o
+	  src/arch/x86_64/gdt/tss/tss.o \
+	  src/klib/mem/kmalloc.o
 
 src/mm/pmm.o: src/mm/pmm.c src/mm/pmm.h src/limine.h
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -51,6 +52,9 @@ src/arch/x86_64/gdt/gdt.o: src/arch/x86_64/gdt/gdt.c src/arch/x86_64/gdt/gdt.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 src/arch/x86_64/gdt/tss/tss.o: src/arch/x86_64/gdt/tss/tss.c src/arch/x86_64/gdt/tss/tss.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+src/klib/mem/kmalloc.o: src/klib/mem/kmalloc.c src/klib/mem/kmalloc.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 src/arch/x86_64/gdt/gdt_asm.o: src/arch/x86_64/gdt/gdt.asm
